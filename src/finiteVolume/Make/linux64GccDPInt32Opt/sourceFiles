@@ -1,0 +1,6 @@
+SOURCE = \
+$(derivedFvPatchFields)/timeVaryingInletOutletVelocity/timeVaryingInletOutletVelocityFvPatchVectorField.C \
+$(derivedFvPatchFields)/timeVaryingInletOutletEpsilon/timeVaryingInletOutletEpsilonFvPatchScalarField.C \
+$(derivedFvPatchFields)/timeVaryingInletOutletTke/timeVaryingInletOutletTkeFvPatchScalarField.C \
+$(derivedFvPatchFields)/fluxQ/fluxQFvPatchVectorField.C \
+$(derivedFvPatchFields)/fluxT/fluxTFvPatchVectorField.C 

@@ -1,0 +1,3 @@
+simplez0Foam.C
+
+EXE = $(FOAM_APPBIN)/simplez0Foam

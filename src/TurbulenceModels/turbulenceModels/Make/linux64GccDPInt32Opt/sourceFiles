@@ -1,0 +1,5 @@
+SOURCE = \
+$(nutWallFunctions)/nutz0WallFunction/nutz0WallFunctionFvPatchScalarField.C \
+$(nutWallFunctions)/nutz0AutoWallFunction/nutz0AutoWallFunctionFvPatchScalarField.C \
+$(epsilonWallFunctions)/epsilonz0WallFunction/epsilonz0WallFunctionFvPatchScalarField.C \
+RAS/kEpsilonMultiscale/kEpsilonMultiscale.C 
