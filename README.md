@@ -1,5 +1,5 @@
 # UrbanFoam
-The repository contains different libraries and applications that can be used in urban simulations. 
+The repository contains different libraries and applications that can be used in urban simulations. OpenFOAM version is 7.0.
 A list of the different applications is: 
 - (in development) applications/solvers/incompressible/simplez0Foam: it is a solver that attempts to take the z0 directly as a surface field based on architecture sermantics from 3D city models
 - applications/utilities/surface/surfaceInfo: it is an application that simplifies surfaceCheck, but just printing the extreme coordinates of an .stl or .obj file without checking the surface properties or saving any additional .obj files
