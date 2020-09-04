@@ -16,9 +16,9 @@ A list of the different libraries is:
 - (in development) src/finiteVolume/fields/fvPatchFields/derived/timeVaryingInletOutletVelocity/timeVaryingInletOutletVelocity: time varying boundary condition for neutral atmospheric boundary layer velocity with changing wind direction
 
 A list of the different functionObjects is:
-- /src/functionObjects/fields/firstCellHeight: function object that calculated the height of the first cell next to a wall
+- /src/functionObjects/fields/firstCellHeight: function object that calculates the height of the first cell next to a wall
 
 **OpenFOAM v8:**
 
 A list of the different functionObjects is:
-- /src/functionObjects/fields/firstCellHeight: function object that calculated the height of the first cell next to a wall
+- /src/functionObjects/fields/firstCellHeight: function object that calculates the height of the first cell next to a wall
