@@ -21,10 +21,10 @@ A list of the different functionObjects is:
 **OpenFOAM v8:**
 
 A list of the different applications is: 
-applications/solvers/heatTransfer/buoyantBoussinesqSimpleFoam: ported the solver from OF6; requires alphatJayatillekeWallFunction to be compiled
+- applications/solvers/heatTransfer/buoyantBoussinesqSimpleFoam: ported the solver from OF6; requires alphatJayatillekeWallFunction to be compiled
 
 A list of the different libraries is: 
-src/wallFunctions/alphatJayatillekeWallFunction: ported the wall function from OF6, it is used for incompressible heat transfer (buoyant) flows
+- src/wallFunctions/alphatJayatillekeWallFunction: ported the wall function from OF6, it is used for incompressible heat transfer (buoyant) flows
 
 A list of the different functionObjects is:
 - /src/functionObjects/fields/firstCellHeight: function object that calculates the height of the first cell next to a wall
