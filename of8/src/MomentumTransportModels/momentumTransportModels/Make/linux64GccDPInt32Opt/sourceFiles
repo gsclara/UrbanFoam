@@ -1,0 +1,3 @@
+SOURCE = \
+$(nutWallFunctions)/nutkz0WallFunction/nutkz0WallFunctionFvPatchScalarField.C \
+$(epsilonWallFunctions)/epsilonz0WallFunction/epsilonz0WallFunctionFvPatchScalarField.C 

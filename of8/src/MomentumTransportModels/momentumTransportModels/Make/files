@@ -1,0 +1,10 @@
+/* Wall function BCs */
+wallFunctions = derivedFvPatchFields/wallFunctions
+
+nutWallFunctions = $(wallFunctions)/nutWallFunctions
+$(nutWallFunctions)/nutkz0WallFunction/nutkz0WallFunctionFvPatchScalarField.C
+
+epsilonWallFunctions = $(wallFunctions)/epsilonWallFunctions
+$(epsilonWallFunctions)/epsilonz0WallFunction/epsilonz0WallFunctionFvPatchScalarField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libUsermomentumTransportModels
