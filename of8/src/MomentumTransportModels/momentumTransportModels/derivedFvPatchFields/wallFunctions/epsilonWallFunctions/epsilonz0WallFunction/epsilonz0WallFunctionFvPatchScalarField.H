@@ -65,7 +65,8 @@ SourceFiles
 #define epsilonz0WallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchField.H"
-
+#include "nutkWallFunctionFvPatchScalarField.H"
+#include "epsilonWallFunctionFvPatchScalarField.H"
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -88,10 +89,10 @@ protected:
         //- Tolerance used in weighted calculations
         static scalar tolerance_;
 
-	//- z0 terrain roughness length
-        scalarField z0_;
+    	//- z0 terrain roughness length
+        scalar z0_terrainfullCD_;
 
-	//- Local copy of turbulence G field
+     	//- Local copy of turbulence G field
         scalarField G_;
 
         //- Local copy of turbulence epsilon field
@@ -234,7 +235,12 @@ public:
             //- Return non-const access to the master's epsilon field
             scalarField& epsilon(bool init = false);
 
-
+            // Return z0
+            scalar z0_terrainfullCD() const
+            {
+                return z0_terrainfullCD_;
+            }
+            
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field

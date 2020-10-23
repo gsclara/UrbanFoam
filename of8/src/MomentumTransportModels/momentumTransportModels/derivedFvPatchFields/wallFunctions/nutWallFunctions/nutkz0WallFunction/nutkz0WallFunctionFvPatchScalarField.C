@@ -69,10 +69,10 @@ tmp<scalarField> nutkz0WallFunctionFvPatchScalarField::nut() const
         scalar uStar = Cmu25*sqrt(k[celli]);
         scalar yPlus = uStar*y[facei]/nuw[facei];
 
-        scalar Edash = (y[facei] + z0_[facei])/z0_[facei];
+        scalar Edash = (y[facei] + z0_terrainfullCD_)/z0_terrainfullCD_;
 
         // Modified by CGS on October,2020
-        scalar yPlusPrime = uStar*(y[facei] + z0_[facei])/nuw[facei];
+        scalar yPlusPrime = uStar*(y[facei] + z0_terrainfullCD_)/nuw[facei];
 
         nutw[facei] =
             nuw[facei]*(yPlus*kappa_/log(max(Edash, 1+1e-4)) - 1);
@@ -91,7 +91,7 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(p, iF),
-    z0_(p.size(), 0.0)
+    z0_terrainfullCD_(0.0)
 {}
 
 
@@ -104,7 +104,7 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
-    z0_(mapper(ptf.z0_))
+    z0_terrainfullCD_(ptf.z0_terrainfullCD_)
 {}
 
 
@@ -116,7 +116,7 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(p, iF, dict),
-    z0_("z0", dict, p.size())
+    z0_terrainfullCD_(dict.lookupOrDefault<scalar>("z0_terrainfullCD",0.0))
 {}
 
 
@@ -126,7 +126,7 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(rwfpsf),
-    z0_(rwfpsf.z0_)
+    z0_terrainfullCD_(rwfpsf.z0_terrainfullCD_)
 {}
 
 
@@ -137,7 +137,7 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(rwfpsf, iF),
-    z0_(rwfpsf.z0_)
+    z0_terrainfullCD_(rwfpsf.z0_terrainfullCD_)
 {}
 
 
@@ -168,35 +168,12 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 //    return pow025(Cmu_)*y*sqrt(kwc)/nuw;
 //}
 // ip-try
-void nutkz0WallFunctionFvPatchScalarField::autoMap
-(
-     const fvPatchFieldMapper& m
-     )
-{
-    nutkWallFunctionFvPatchScalarField::autoMap(m);
-    m(z0_, z0_);
-}
-
-
-void nutkz0WallFunctionFvPatchScalarField::rmap
-(
-     const fvPatchScalarField& ptf,
-         const labelList& addr
-         )
-{
-    nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
-
-    const nutkz0WallFunctionFvPatchScalarField& nrwfpsf =
-        refCast<const nutkz0WallFunctionFvPatchScalarField>(ptf);
-
-    z0_.rmap(nrwfpsf.z0_, addr);
-}
 
 void nutkz0WallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
-    writeEntry(os, "z0", z0_);
+    writeEntry(os, "z0_terrainfullCD", z0_terrainfullCD_);
     writeEntry(os, "value", *this);
 }
 

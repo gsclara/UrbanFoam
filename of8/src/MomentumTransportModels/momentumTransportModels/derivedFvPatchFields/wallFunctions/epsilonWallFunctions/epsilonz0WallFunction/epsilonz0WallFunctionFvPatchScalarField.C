@@ -69,7 +69,7 @@ void Foam::epsilonz0WallFunctionFvPatchScalarField::writeLocalEntries
     Ostream& os
 ) const
 {
-    os.writeKeyword("z0") << z0_ << token::END_STATEMENT << nl;
+    writeEntry(os,"z0_terrainfullCD",z0_terrainfullCD_);
 }
 
 void Foam::epsilonz0WallFunctionFvPatchScalarField::createAveragingWeights()
@@ -219,15 +219,13 @@ void Foam::epsilonz0WallFunctionFvPatchScalarField::calculate
 
         if (yPlus > nutw.yPlusLam())
         {
-            epsilon0[celli] += w*Cmu75*pow(k[celli], 1.5)/(nutw.kappa()*(y[facei]+z0_[facei]));
+            epsilon0[celli] += w*Cmu75*pow(k[celli], 1.5)/(nutw.kappa()*(y[facei]+z0_terrainfullCD_));
 
             G0[celli] +=
                 w
                *(nutw[facei] + nuw[facei])
                *magGradUw[facei]
-               *(nutw[facei] + nuw[facei])
-               *magGradUw[facei]
-               /(Cmu25*sqrt(k[celli])*nutw.kappa()*(y[facei]+z0_[facei]));
+               /(Cmu25*sqrt(k[celli])*nutw.kappa()*(y[facei]+z0_terrainfullCD_));
         }
         else
         {
@@ -247,7 +245,7 @@ epsilonz0WallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    z0_(p.size(),0.0075),
+    z0_terrainfullCD_(0.0),
     G_(),
     epsilon_(),
     initialised_(false),
@@ -265,7 +263,7 @@ epsilonz0WallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    z0_("z0", dict, p.size()),
+    z0_terrainfullCD_(dict.lookupOrDefault<scalar>("z0_terrainfullCD",0.0)),
     G_(),
     epsilon_(),
     initialised_(false),
@@ -287,7 +285,7 @@ epsilonz0WallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    z0_(mapper(ptf.z0_)),
+    z0_terrainfullCD_(ptf.z0_terrainfullCD_),
     G_(),
     epsilon_(),
     initialised_(false),
@@ -303,7 +301,7 @@ epsilonz0WallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf),
-    z0_(ewfpsf.z0_),
+    z0_terrainfullCD_(ewfpsf.z0_terrainfullCD_),
     G_(),
     epsilon_(),
     initialised_(false),
@@ -320,7 +318,7 @@ epsilonz0WallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf, iF),
-    z0_(ewfpsf.z0_),
+    z0_terrainfullCD_(ewfpsf.z0_terrainfullCD_),
     G_(),
     epsilon_(),
     initialised_(false),
@@ -549,8 +547,8 @@ void Foam::epsilonz0WallFunctionFvPatchScalarField::manipulateMatrix
 void Foam::epsilonz0WallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-//    writeLocalEntries(os);
-    writeEntry(os, "z0", z0_);
+    writeLocalEntries(os);
+//    writeEntry(os, "z0_terrainfullCD", z0_terrainfullCD_);
     writeEntry(os, "value", *this);
 }
 

@@ -69,7 +69,7 @@ protected:
     // Protected Data
 
 	//- Surface roughness length
-        scalarField z0_;
+        scalar z0_terrainfullCD_;
 
     // Protected Member Functions
 
@@ -148,25 +148,6 @@ public:
 
     // Member Functions
         
-        // Return z0
-        scalarField& z0()
-        {
-            return z0_;
-        }
-
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap(const fvPatchFieldMapper&);
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchScalarField&,
-                const labelList&
-            );
-            //
     // I-O
 
         //- Write
