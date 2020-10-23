@@ -49,7 +49,7 @@ SourceFiles
 #ifndef nutkz0WallFunctionFvPatchScalarField_H
 #define nutkz0WallFunctionFvPatchScalarField_H
 
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "nutkWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,7 +62,7 @@ namespace Foam
 
 class nutkz0WallFunctionFvPatchScalarField
 :
-    public nutWallFunctionFvPatchScalarField
+    public nutkWallFunctionFvPatchScalarField
 {
 protected:
 
@@ -155,9 +155,18 @@ public:
         }
 
 
-        //- Calculate and return the yPlus at the boundary
-        virtual tmp<scalarField> yPlus() const;
+        // Mapping functions
 
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap(const fvPatchFieldMapper&);
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchScalarField&,
+                const labelList&
+            );
+            //
     // I-O
 
         //- Write

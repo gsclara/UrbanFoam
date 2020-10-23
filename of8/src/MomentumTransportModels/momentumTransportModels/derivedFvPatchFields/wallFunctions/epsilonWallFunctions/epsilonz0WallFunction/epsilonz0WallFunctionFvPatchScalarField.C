@@ -549,8 +549,9 @@ void Foam::epsilonz0WallFunctionFvPatchScalarField::manipulateMatrix
 void Foam::epsilonz0WallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    writeLocalEntries(os);
+//    writeLocalEntries(os);
     writeEntry(os, "z0", z0_);
+    writeEntry(os, "value", *this);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

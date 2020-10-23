@@ -7,4 +7,7 @@ $(nutWallFunctions)/nutkz0WallFunction/nutkz0WallFunctionFvPatchScalarField.C
 epsilonWallFunctions = $(wallFunctions)/epsilonWallFunctions
 $(epsilonWallFunctions)/epsilonz0WallFunction/epsilonz0WallFunctionFvPatchScalarField.C
 
+alphatWallFunctions = $(wallFunctions)/alphatWallFunctions
+$(alphatWallFunctions)/alphatJayatillekeWallFunction/alphatJayatillekeWallFunctionFvPatchScalarField.C
+
 LIB = $(FOAM_USER_LIBBIN)/libUsermomentumTransportModels

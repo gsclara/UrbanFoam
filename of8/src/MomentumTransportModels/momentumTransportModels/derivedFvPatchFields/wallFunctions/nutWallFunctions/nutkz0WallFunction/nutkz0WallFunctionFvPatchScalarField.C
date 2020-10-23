@@ -59,7 +59,7 @@ tmp<scalarField> nutkz0WallFunctionFvPatchScalarField::nut() const
 
     const scalar Cmu25 = pow025(Cmu_);
 
-    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tnutw(new scalarField(*this));
     scalarField& nutw = tnutw.ref();
 
     forAll(nutw, facei)
@@ -90,7 +90,7 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF),
+    nutkWallFunctionFvPatchScalarField(p, iF),
     z0_(p.size(), 0.0)
 {}
 
@@ -103,7 +103,7 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    nutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
     z0_(mapper(ptf.z0_))
 {}
 
@@ -115,57 +115,81 @@ nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF, dict),
+    nutkWallFunctionFvPatchScalarField(p, iF, dict),
     z0_("z0", dict, p.size())
 {}
 
 
 nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 (
-    const nutkz0WallFunctionFvPatchScalarField& wfpsf
+    const nutkz0WallFunctionFvPatchScalarField& rwfpsf
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf),
-    z0_(wfpsf.z0_)
+    nutkWallFunctionFvPatchScalarField(rwfpsf),
+    z0_(rwfpsf.z0_)
 {}
 
 
 nutkz0WallFunctionFvPatchScalarField::nutkz0WallFunctionFvPatchScalarField
 (
-    const nutkz0WallFunctionFvPatchScalarField& wfpsf,
+    const nutkz0WallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf, iF),
-    z0_(wfpsf.z0_)
+    nutkWallFunctionFvPatchScalarField(rwfpsf, iF),
+    z0_(rwfpsf.z0_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField> nutkz0WallFunctionFvPatchScalarField::yPlus() const
+//tmp<scalarField> nutkz0WallFunctionFvPatchScalarField::yPlus() const
+//{
+//    const label patchi = patch().index();
+//
+//    const momentumTransportModel& turbModel =
+//        db().lookupObject<momentumTransportModel>
+//        (
+//            IOobject::groupName
+//            (
+//                momentumTransportModel::typeName,
+//                internalField().group()
+//            )
+//        );
+//
+//    const scalarField& y = turbModel.y()[patchi];
+//
+//    const tmp<volScalarField> tk = turbModel.k();
+//    const volScalarField& k = tk();
+//    tmp<scalarField> kwc = k.boundaryField()[patchi].patchInternalField();
+//    const tmp<scalarField> tnuw = turbModel.nu(patchi);
+//    const scalarField& nuw = tnuw();
+//
+//    return pow025(Cmu_)*y*sqrt(kwc)/nuw;
+//}
+// ip-try
+void nutkz0WallFunctionFvPatchScalarField::autoMap
+(
+     const fvPatchFieldMapper& m
+     )
 {
-    const label patchi = patch().index();
+    nutkWallFunctionFvPatchScalarField::autoMap(m);
+    m(z0_, z0_);
+}
 
-    const momentumTransportModel& turbModel =
-        db().lookupObject<momentumTransportModel>
-        (
-            IOobject::groupName
-            (
-                momentumTransportModel::typeName,
-                internalField().group()
-            )
-        );
 
-    const scalarField& y = turbModel.y()[patchi];
+void nutkz0WallFunctionFvPatchScalarField::rmap
+(
+     const fvPatchScalarField& ptf,
+         const labelList& addr
+         )
+{
+    nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const tmp<volScalarField> tk = turbModel.k();
-    const volScalarField& k = tk();
-    tmp<scalarField> kwc = k.boundaryField()[patchi].patchInternalField();
-    const tmp<scalarField> tnuw = turbModel.nu(patchi);
-    const scalarField& nuw = tnuw();
+    const nutkz0WallFunctionFvPatchScalarField& nrwfpsf =
+        refCast<const nutkz0WallFunctionFvPatchScalarField>(ptf);
 
-    return pow025(Cmu_)*y*sqrt(kwc)/nuw;
+    z0_.rmap(nrwfpsf.z0_, addr);
 }
 
 void nutkz0WallFunctionFvPatchScalarField::write(Ostream& os) const
