@@ -32,6 +32,7 @@ A list of the different libraries is:
 
 ### OpenFOAM v10:
 A list of the different applications is: 
+- applications/solvers/incompressible/simpleDispersionFoam: scalar dispersion solver with Sc and Sct numbers
 - applications/utilities/surface/surfaceBoundingBox: prints the bounding box from a surface
 
 A list of the different libraries is: 
