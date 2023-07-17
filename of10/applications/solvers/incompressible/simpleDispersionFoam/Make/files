@@ -1,0 +1,3 @@
+simpleDispersionFoam.C
+
+EXE = $(FOAM_USER_APPBIN)/simpleDispersionFoam
