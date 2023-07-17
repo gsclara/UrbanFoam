@@ -1,0 +1,293 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  7  
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*----------------- Bounding Box ------------------*/
+// From blockMesh checkMesh:  (-480 -480 -5.61789) (480 480 186.38211)
+x_min -480;
+y_min -480;
+z_min  -5.61789;
+x_max  480;
+y_max  480;
+z_max  35;  //approximately tallest building
+//K 1.0;
+
+//ip: a minor change to work with building height, not zmax
+K #calc "($z_max - $z_min)/$z_max";
+F 0.3; // just a factor to reduce some things
+
+// box refinement definition from closest to the buildings to furthest
+// box 1
+x1_min #calc "$x_min - $K*$z_max";
+x1_max #calc "$x_max + $K*$z_max";
+y1_min #calc "$y_min - $K*$z_max";
+y1_max #calc "$y_max + 3*$K*$z_max";
+z1_min $z_min;
+z1_max #calc "$z_max + $F*$K*$z_max";
+
+// box 2
+x2_min #calc "$x_min - 2*$K*$z_max";
+x2_max #calc "$x_max + 2*$K*$z_max";
+y2_min #calc "$y_min - 2*$K*$z_max";
+y2_max #calc "$y_max + 6*$K*$z_max";
+z2_min $z_min;
+z2_max #calc "$z_max + 1.2*$K*$z_max";
+
+// Which of the steps to run
+castellatedMesh true;
+snap            true;
+addLayers       false;
+
+
+// Geometry. Definition of all surfaces. All surfaces are of class
+// searchableSurface.
+// Surfaces are used
+// - to specify refinement for any mesh cell intersecting it
+// - to specify refinement for any mesh cell inside/outside/near
+// - to 'snap' the mesh boundary to the surface
+geometry
+{
+    box1
+    {
+        type searchableBox;
+        min ($x1_min $y1_min $z1_min);
+        max ($x1_max $y1_max $z1_max);
+    }
+
+    box2
+    {
+        type searchableBox;
+        min ($x2_min $y2_min $z2_min);
+        max ($x2_max $y2_max $z2_max);
+    }
+
+    Mesh
+    {
+        file "Mesh.obj";
+        type triSurfaceMesh;
+        regions
+        {
+            Buildings
+            {
+                name Buildings;
+            }
+
+            Terrain
+            {
+                name Terrain;
+            }
+
+            Water
+            {
+                name Water;
+            }
+
+            Vegetation
+            {
+                name Vegetation;
+            }
+        }
+    }
+
+    Building_Refinement
+    {
+        file "Mesh_Buildings.obj";
+        type triSurfaceMesh;
+    }
+
+};
+
+
+// Settings for the castellatedMesh generation.
+castellatedMeshControls
+{
+
+    maxLocalCells 20000000;
+    maxGlobalCells 70000000;
+    minRefinementCells 0;
+    maxLoadUnbalance 0.10;
+    nCellsBetweenLevels 4;
+    features
+    (
+	{
+   	    file "Mesh_Buildings.eMesh";
+            level 4;
+	}
+    );
+
+    refinementSurfaces
+    {
+        Mesh
+        {
+            level (0 0);
+
+            regions
+            {
+                Buildings
+                {
+                    // Surface-wise min and max refinement level
+                    level (4 4);
+
+                    patchInfo
+                    {
+                        type wall;
+                    }
+                }
+
+                Terrain
+                {
+                    level (4 4);
+
+                    patchInfo
+                    {
+                        type wall;
+                    }
+                }
+
+                Water
+                {
+                    level (4 4);
+
+                    patchInfo
+                    {
+                        type wall;
+                    }
+                }
+
+                Vegetation
+                {
+                    level (4 4);
+
+                    patchInfo
+                    {
+                        type wall;
+                    }
+                }
+            }
+        }
+    }
+
+    resolveFeatureAngle 30;
+
+    refinementRegions
+    {
+        box1
+        {
+            mode inside;
+            levels ((1E15 2));
+        }
+
+        box2
+        {
+            mode inside;
+            levels ((1E15 1));
+        }
+
+	// Extra refinment for buildings
+	Building_Refinement
+	{
+           mode distance;
+           levels ((4.0 5) (12.0 4) (25.0 3));
+	}
+
+	// Extra distance refinement for all other surfaces (terrain and surface layers)
+        Mesh
+	{
+           mode distance;
+           levels ((2.0 4));
+	}
+
+    }
+
+    locationInMesh (0 0 100);
+    allowFreeStandingZoneFaces true;
+}
+
+// Settings for the snapping.
+snapControls
+{
+    nSmoothPatch 2;
+    tolerance 4.0;
+    nSolveIter 50;
+    nRelaxIter 5;
+    nFeatureSnapIter 10;
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+    multiRegionFeatureSnap false;
+}
+
+// Settings for the layer addition.
+addLayersControls
+{
+    relativeSizes true;
+    expansionRatio 1.2;
+    firstLayerThickness 0.4;
+    minThickness 0.4;
+    layers
+    {
+        Buildings
+        {
+            nSurfaceLayers 3;
+
+        }
+    }
+
+    nGrow 0;
+    featureAngle 130;
+    maxFaceThicknessRatio 0.5;
+    nSmoothSurfaceNormals 1;
+    nSmoothThickness 10;
+    minMedialAxisAngle 90;
+    maxThicknessToMedialRatio 0.3;
+    nSmoothNormals 3;
+    slipFeatureAngle 30;
+    nRelaxIter 5;
+    nBufferCellsNoExtrude 0;
+    nLayerIter 50;
+    nRelaxedIter 20;
+}
+
+
+// Generic mesh quality settings. At any undoable phase these determine
+// where to undo.
+meshQualityControls
+{
+    maxNonOrtho 65;
+    maxBoundarySkewness 5;
+    maxInternalSkewness 4;
+    maxConcave 80;
+    minVol 1e-13;
+    minTetQuality 1e-30;
+    minArea -1;
+    minTwist 0.05;
+    minDeterminant 0.001;
+    minFaceWeight 0.05;
+    minVolRatio 0.01;
+    minTriangleTwist -1;
+    // minVolCollapseRatio 0.5;
+    nSmoothScale 4;
+    errorReduction 0.75;
+    relaxed
+    {
+        maxNonOrtho 75;
+    }
+}
+
+
+// Advanced
+mergeTolerance 1e-6;
+
+
+// ************************************************************************* //
