@@ -1,0 +1,5 @@
+SOURCE = \
+derivedFvPatchFields/atmdBoundaryLayer/atmdBoundaryLayer.C \
+derivedFvPatchFields/atmdBoundaryLayerInletVelocity/atmdBoundaryLayerInletVelocityFvPatchVectorField.C \
+derivedFvPatchFields/atmdBoundaryLayerInletK/atmdBoundaryLayerInletKFvPatchScalarField.C \
+derivedFvPatchFields/atmdBoundaryLayerInletEpsilon/atmdBoundaryLayerInletEpsilonFvPatchScalarField.C 

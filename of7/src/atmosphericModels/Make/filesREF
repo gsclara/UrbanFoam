@@ -1,0 +1,6 @@
+derivedFvPatchFields/atmBoundaryLayer/atmBoundaryLayer.C
+derivedFvPatchFields/atmBoundaryLayerInletVelocity/atmBoundaryLayerInletVelocityFvPatchVectorField.C
+derivedFvPatchFields/atmBoundaryLayerInletK/atmBoundaryLayerInletKFvPatchScalarField.C
+derivedFvPatchFields/atmBoundaryLayerInletEpsilon/atmBoundaryLayerInletEpsilonFvPatchScalarField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libUseratmosphericModels
