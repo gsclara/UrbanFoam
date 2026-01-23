@@ -47,7 +47,13 @@ void Foam::atmdBoundaryLayer::init()
     flowDir_ /= mag(flowDir_);
     zDir_ /= mag(zDir_);
 
-    Ustar_ = kappa_*Uref_/(log((Zref_ + z0_)/z0_));
+    // Calculate Ustar for each face to ensure Uref is matched at Zref
+    // Note: Zref is height above ground, displacement d is applied in the velocity profile
+    // Since z0_ is a field, we need to calculate Ustar for each element
+    forAll(Ustar_, i)
+    {
+        Ustar_[i] = kappa_*Uref_/(log((Zref_ + z0_[i])/z0_[i]));
+    }
 }
 
 
@@ -224,11 +230,67 @@ Foam::tmp<Foam::vectorField> Foam::atmdBoundaryLayer::U
     const vectorField& p
 ) const
 {
-    const scalar groundMin = zDir() & ppMin_;
+    // Calculate local ground level for each face by finding minimum z-coordinate
+    // at each face's horizontal (x,y) position across all points on the patch
+    scalarField localGroundMin(p.size());
+    const pointField& points = patch_.localPoints();
+    const faceList& faces = patch_.localFaces();
+
+    // Estimate typical mesh size for tolerance
+    scalar avgMeshSize = 0.0;
+    if (points.size() > 1)
+    {
+        scalar minDist = GREAT;
+        for (label i = 0; i < min(label(10), points.size()); i++)
+        {
+            for (label j = i+1; j < min(label(10), points.size()); j++)
+            {
+                minDist = min(minDist, mag(points[i] - points[j]));
+            }
+        }
+        avgMeshSize = minDist;
+    }
+    scalar tolerance = max(1e-6, avgMeshSize * 0.1);
+
+    forAll(localGroundMin, facei)
+    {
+        // Get horizontal position of this face (perpendicular to zDir)
+        const vector facePos = p[facei];
+        const vector horizontalPos = facePos - zDir_*(zDir_ & facePos);
+
+        // Find minimum z among all points near this horizontal position
+        scalar minZ = GREAT;
+        forAll(points, pointi)
+        {
+            const vector pointPos = points[pointi];
+            const vector pointHorizontalPos = pointPos - zDir_*(zDir_ & pointPos);
+
+            // Check if point is at same horizontal location (within tolerance)
+            if (mag(pointHorizontalPos - horizontalPos) < tolerance)
+            {
+                const scalar z = zDir_ & pointPos;
+                minZ = min(minZ, z);
+            }
+        }
+
+        // Fallback: if no points found (shouldn't happen), use face's own vertices
+        if (minZ == GREAT)
+        {
+            const face& f = faces[facei];
+            forAll(f, fp)
+            {
+                const scalar z = zDir_ & points[f[fp]];
+                minZ = min(minZ, z);
+            }
+        }
+
+        localGroundMin[facei] = minZ;
+    }
+
     const scalarField Un
     (
         (Ustar_/kappa_)
-       *log(max((zDir_ & p) - groundMin - d_ + z0_, z0_)/z0_)
+       *log(max((zDir_ & p) - localGroundMin - d_ + z0_, z0_)/z0_)
     );
 
     if (offset_)
@@ -255,10 +317,60 @@ Foam::tmp<Foam::scalarField> Foam::atmdBoundaryLayer::k
     // (YGCJ:Eq. 21; RH:Eq. 7, HW:Eq. 6 when C1=0 and C2=1)
     if (decayingk_)
     {
-	const scalar groundMin = zDir() & ppMin_;
-        tk.ref() = sqr(Ustar_)/sqrt(Cmu_)*sqrt(C1_*log(((zDir_ & p) - groundMin - d_ + z0_)/z0_) + C2_);   
+        // Calculate local ground level for each face
+        scalarField localGroundMin(p.size());
+        const pointField& points = patch_.localPoints();
+        const faceList& faces = patch_.localFaces();
+
+        scalar avgMeshSize = 0.0;
+        if (points.size() > 1)
+        {
+            scalar minDist = GREAT;
+            for (label i = 0; i < min(label(10), points.size()); i++)
+            {
+                for (label j = i+1; j < min(label(10), points.size()); j++)
+                {
+                    minDist = min(minDist, mag(points[i] - points[j]));
+                }
+            }
+            avgMeshSize = minDist;
+        }
+        scalar tolerance = max(1e-6, avgMeshSize * 0.1);
+
+        forAll(localGroundMin, facei)
+        {
+            const vector facePos = p[facei];
+            const vector horizontalPos = facePos - zDir_*(zDir_ & facePos);
+
+            scalar minZ = GREAT;
+            forAll(points, pointi)
+            {
+                const vector pointPos = points[pointi];
+                const vector pointHorizontalPos = pointPos - zDir_*(zDir_ & pointPos);
+
+                if (mag(pointHorizontalPos - horizontalPos) < tolerance)
+                {
+                    const scalar z = zDir_ & pointPos;
+                    minZ = min(minZ, z);
+                }
+            }
+
+            if (minZ == GREAT)
+            {
+                const face& f = faces[facei];
+                forAll(f, fp)
+                {
+                    const scalar z = zDir_ & points[f[fp]];
+                    minZ = min(minZ, z);
+                }
+            }
+
+            localGroundMin[facei] = minZ;
+        }
+
+        tk.ref() = sqr(Ustar_)/sqrt(Cmu_)*sqrt(C1_*log(((zDir_ & p) - localGroundMin - d_ + z0_)/z0_) + C2_);
     }
-    
+
     if (offset_)
     {
         const scalarField z((zDir_ & p) - d_);
@@ -274,17 +386,66 @@ Foam::tmp<Foam::scalarField> Foam::atmdBoundaryLayer::epsilon
     const vectorField& p
 ) const
 {
-    const scalar groundMin = zDir() & ppMin_;
+    // Calculate local ground level for each face
+    scalarField localGroundMin(p.size());
+    const pointField& points = patch_.localPoints();
+    const faceList& faces = patch_.localFaces();
+
+    scalar avgMeshSize = 0.0;
+    if (points.size() > 1)
+    {
+        scalar minDist = GREAT;
+        for (label i = 0; i < min(label(10), points.size()); i++)
+        {
+            for (label j = i+1; j < min(label(10), points.size()); j++)
+            {
+                minDist = min(minDist, mag(points[i] - points[j]));
+            }
+        }
+        avgMeshSize = minDist;
+    }
+    scalar tolerance = max(1e-6, avgMeshSize * 0.1);
+
+    forAll(localGroundMin, facei)
+    {
+        const vector facePos = p[facei];
+        const vector horizontalPos = facePos - zDir_*(zDir_ & facePos);
+
+        scalar minZ = GREAT;
+        forAll(points, pointi)
+        {
+            const vector pointPos = points[pointi];
+            const vector pointHorizontalPos = pointPos - zDir_*(zDir_ & pointPos);
+
+            if (mag(pointHorizontalPos - horizontalPos) < tolerance)
+            {
+                const scalar z = zDir_ & pointPos;
+                minZ = min(minZ, z);
+            }
+        }
+
+        if (minZ == GREAT)
+        {
+            const face& f = faces[facei];
+            forAll(f, fp)
+            {
+                const scalar z = zDir_ & points[f[fp]];
+                minZ = min(minZ, z);
+            }
+        }
+
+        localGroundMin[facei] = minZ;
+    }
+
     tmp<scalarField> tepsilon
     (
-        pow3(Ustar_)/(kappa_*((zDir_ & p) - groundMin - d_ + z0_))
+        pow3(Ustar_)/(kappa_*((zDir_ & p) - localGroundMin - d_ + z0_))
     );
 
     // (YGCJ:Eq. 21; RH:Eq. 7, HW:Eq. 6 when C1=0 and C2=1)
     if (decayingk_)
     {
-        const scalar groundMin = zDir() & ppMin_;
-	tepsilon.ref() = pow3(Ustar_)/(kappa_*((zDir_ & p) - groundMin - d_ + z0_))*sqrt(C1_*log(((zDir_ & p) - groundMin - d_ + z0_)/z0_) + C2_);
+        tepsilon.ref() = pow3(Ustar_)/(kappa_*((zDir_ & p) - localGroundMin - d_ + z0_))*sqrt(C1_*log(((zDir_ & p) - localGroundMin - d_ + z0_)/z0_) + C2_);
     }
 
     if (offset_)
