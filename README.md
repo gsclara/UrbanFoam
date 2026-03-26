@@ -39,6 +39,13 @@ A list of the different libraries is:
 - src/MomentumTransportModels/momentumTransportModels/derivedFvPatchFields/wallFunctions/epsilonWallFunctions/epsilonz0WallFunction: wall function adapted from Parente et al. 2011b for atmospheric flows 
 - /src/functionObjects/field/writeMeshH/writeMeshH: function object that calculates h value for the grid convergence computation 
 
+### OpenFOAM v2312:
+
+A list of the different applications is: 
+- applications/solvers/incompressible/passiveSimpleFoam: it is a solver that contains an added passive scalar transport equation to the existing simpleFoam solver
+- applications/solvers/heatTransfer/mybuoyantBoussinesqSimpleFoam: it is a solver that contains two added passive scalar transport equations to the existing buoyantBoussinesqSimpleFoam solver
+- applications/solvers/heatTransfer/mybuoyantSimpleFoam: it is a solver that contains two added passive scalar transport equations to the existing buoyantSimpleFoam solver
+
 
 
 
